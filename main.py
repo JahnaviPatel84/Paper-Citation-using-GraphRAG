@@ -7,12 +7,12 @@ try:
 except ImportError:
     pass  # Handle or install with `pip install cdlib`
 
-import openai  
+import openai  # TODO: Use a open source model.
 import json 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 client = openai
-
+#TODO: Function to load pdfs and divide them into documents. Can start with 5-10 related papers lets say transformer paper and then papers which cited it and so on.
 # Ensure DOCUMENTS is defined, e.g.:
 DOCUMENTS = ["Sample document 1 text.", "Sample document 2 text."]
 
@@ -24,7 +24,7 @@ def split_documents_into_chunks(documents, chunk_size=600, overlap_size=100):
             chunk = document[i:i + chunk_size]
             chunks.append(chunk)
     return chunks
-
+# TODO: Identify what elements we want to extract. Experiment with the default prompt
 # 2. Text Chunks → Element Instances
 def extract_elements_from_chunks(chunks):
     elements = []
@@ -39,7 +39,7 @@ def extract_elements_from_chunks(chunks):
         entities_and_relations = response.choices[0].message.content
         elements.append(entities_and_relations)
     return elements
-
+# TODO: Identify how we want our graph to look like. Experiment with the default prompt
 # 3. Element Instances → Element Summaries
 def summarize_elements(elements):
     summaries = []
