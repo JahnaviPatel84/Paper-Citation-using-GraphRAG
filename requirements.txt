@@ -5,3 +5,4 @@ cdlib
 python-igraph
 python-dotenv
 langchain
+PyMuPDF
