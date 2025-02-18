@@ -1,18 +1,37 @@
 import networkx as nx 
 import os
-from networkx.algorithms import community  # If using built-in community detection methods
-
-try:
-    from cdlib.algorithms import leiden  # Community detection using Leiden algorithm from CDlib
-except ImportError:
-    pass  # Handle or install with `pip install cdlib`
-
-import openai  # TODO: Use a open source model.
+from networkx.algorithms import community  
+from cdlib.algorithms import leiden  
 import json 
+import os
+import json
+import requests
+import networkx as nx
+import os
+import requests
+import json
+import os
+import openai
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://api.studio.nebius.com/v1/",
+    api_key=os.environ.get("NEBIUS_API_KEY")
+)
+#usage
+response = client.chat.completions.create(
+    model="meta-llama/Llama-3.3-70B-Instruct",
+    temperature=0,
+    messages=[{"role": "system", "content": "Extract entities and relationships from the following text."}, 
+              {"role": "user", "content": "John is a software engineer at TechCorp."}]
+)
+
+print(response.choices[0].message.content)
+
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 client = openai
-#TODO: Function to load pdfs and divide them into documents. Can start with 5-10 related papers lets say transformer paper and then papers which cited it and so on.
+# TODO: Function to load pdfs and divide them into documents. Can start with 5-10 related papers lets say transformer paper and then papers which cited it and so on.
 # Ensure DOCUMENTS is defined, e.g.:
 DOCUMENTS = ["Sample document 1 text.", "Sample document 2 text."]
 
