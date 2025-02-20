@@ -82,6 +82,12 @@ if text:
 else:
     print("Failed to load or clean the text.")
 
+# TODO: Add metadata to documents = {title, authors, publication date, citations, etc.}
+
+# TODO: Merge documents based on concepts and metadata to form nodes.
+
+# TODO: Visualize the graph of nodes.
+
 # # TODO: Identify what elements we want to extract. Experiment with the default prompt
 # # 2. Text Chunks → Element Instances
 # def extract_elements_from_chunks(chunks):
