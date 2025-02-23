@@ -6,3 +6,5 @@ python-igraph
 python-dotenv
 langchain
 PyMuPDF
+sentence_transformers
+scikit-learn
