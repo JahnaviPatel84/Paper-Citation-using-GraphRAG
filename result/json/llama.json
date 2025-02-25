@@ -1,0 +1,90 @@
+{
+    "novel_concepts": [
+        {
+            "name": "LLaMA",
+            "type": "foundation language models",
+            "description": "A collection of language models ranging from 7B to 65B parameters, trained on trillions of tokens.",
+            "key_innovations": [
+                "Training state-of-the-art models using publicly available datasets exclusively.",
+                "Achieving competitive performance with fewer parameters."
+            ],
+            "advantages": [
+                "Democratize access and study of LLMs.",
+                "Can be run on a single GPU."
+            ],
+            "components": [
+                "Foundation language models with different parameter sizes (7B to 65B)"
+            ],
+            "limitations": [],
+            "validation_methods": [
+                "Showed that LLaMA-13B outperforms GPT-3 on most benchmarks."
+            ],
+            "technical_details": []
+        },
+        {
+            "name": "Scaling laws",
+            "type": "methodology",
+            "description": "Determine how to best scale the dataset and model sizes for a particular training compute budget.",
+            "key_innovations": [
+                "Introduced by Hoffmann et al. (2022).",
+                "Ignores the inference budget."
+            ],
+            "advantages": [
+                "Provides a framework for scaling model and dataset sizes."
+            ],
+            "components": [
+                "Training compute budget.",
+                "Dataset and model size scaling laws"
+            ],
+            "limitations": [
+                "Disregards the inference budget, which becomes critical when serving a language model at scale."
+            ],
+            "validation_methods": [
+                "Experimental results showing that training smaller models on more data can lead to better performance."
+            ],
+            "technical_details": []
+        }
+    ],
+    "referenced_concepts": [
+        {
+            "name": "Large Language Models (LLMs)",
+            "type": "concept",
+            "description": "Language models trained on massive corpora of texts, capable of performing new tasks from textual instructions or a few examples.",
+            "original_source": "Brown et al. (2020)",
+            "usage_in_paper": "Introduced as a concept that LLaMA builds upon.",
+            "technical_details": []
+        },
+        {
+            "name": "Transformer",
+            "type": "architecture",
+            "description": "A popular neural network architecture for sequence-to-sequence tasks.",
+            "original_source": "Vaswani et al. (2020)",
+            "usage_in_paper": "Implicitly used as a building block for LLaMA architecture.",
+            "technical_details": []
+        }
+    ],
+    "relationships": [
+        {
+            "source_concept": "LLaMA",
+            "target_concept": "Large Language Models (LLMs)",
+            "relationship_type": "builds upon",
+            "description": "LLaMA is a specific instance of LLMs, trained on trillions of tokens.",
+            "technical_details": [
+                "LLaMA's architecture is based on self-attention mechanisms and transformers."
+            ],
+            "advantages": [],
+            "limitations": []
+        },
+        {
+            "source_concept": "LLaMA",
+            "target_concept": "Scaling laws",
+            "relationship_type": "extends",
+            "description": "LLaMA builds upon the scaling laws but emphasizes the importance of the inference budget.",
+            "technical_details": [
+                "LLaMA's architecture is designed to achieve competitive performance with fewer parameters, making it faster at inference."
+            ],
+            "advantages": [],
+            "limitations": []
+        }
+    ]
+}
