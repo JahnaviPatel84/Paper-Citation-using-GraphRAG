@@ -10,59 +10,20 @@ Original file is located at
 import streamlit as st
 import pandas as pd
 from sentence_transformers import SentenceTransformer, util
-from PIL import Image
 
-# ---------------- Header + Sidebar -------------------
-st.set_page_config(page_title="Graph-RAG Citation Recommender", layout="wide")
-
-# Hero Banner
-hero_img = Image.open("hero_banner.jpg")
-st.image(hero_img, use_column_width=True)
-
-# Sidebar Branding
-with st.sidebar:
-    st.image("images/logo.png", width=120)
-    st.markdown("### 📚 Graph-RAG Citation Recommender")
-    st.write("""
-    Discover academic papers based on your research paragraph using an advanced graph-based semantic search system.
-    """)
-    st.markdown("---")
-    st.markdown("**👥 Contributors:**")
-    st.markdown("- Jahnavi Patel\n- Pratishtha Gaur\n- Vivek Rayalu")
-    st.markdown("---")
-    st.markdown("**🔗 Project Built at HDSI, UCSD**")
-
-# ---------------- Load Data & Model -------------------
+# Load data
 @st.cache_data
 def load_data():
     concepts_df = pd.read_csv("data/leiden_clusters.csv")
-    papers_df = pd.read_csv("data/Paper Info.csv")
+    papers_df = pd.read_csv("data/Paper_Info.csv")
     return concepts_df, papers_df
 
+# Load model
 @st.cache_resource
 def load_model():
-    return SentenceTransformer("all-MiniLM-L6-v2")
+    return SentenceTransformer('all-MiniLM-L6-v2')
 
-concepts_df, papers_df = load_data()
-model = load_model()
-
-# ---------------- Main Interface -------------------
-st.markdown("### 🔍 Discover Relevant Citations")
-query = st.text_area("Paste your research paragraph here:")
-citation_style = st.selectbox("📑 Choose citation format:", ["MLA", "APA", "BibTeX"])
-
-# Action Buttons
-col1, col2, col3, col4 = st.columns(4)
-with col1:
-    st.button("🚀 Discover Citations")
-with col2:
-    st.button("📊 View Concept Clusters (coming soon)", disabled=True)
-with col3:
-    st.button("📁 Upload Custom Data (coming soon)", disabled=True)
-with col4:
-    st.button("📥 Export Recommendations (coming soon)", disabled=True)
-
-# ---------------- Citation Discovery Logic -------------------
+# Semantic Search
 def find_top_concepts(query, concepts_df, model, top_k=5):
     concept_texts = concepts_df['description'].fillna('')
     concept_embeddings = model.encode(concept_texts, convert_to_tensor=True)
@@ -73,6 +34,7 @@ def find_top_concepts(query, concepts_df, model, top_k=5):
     results['score'] = similarities[top_indices].cpu().numpy()
     return results
 
+# Match Papers
 def find_related_papers(concepts, papers_df):
     related_papers = []
     for concept in concepts['name']:
@@ -80,30 +42,84 @@ def find_related_papers(concepts, papers_df):
         related_papers.append((concept, matching_papers))
     return related_papers
 
-# ---------------- Output -------------------
-if st.button("🎯 Get Recommendations") and query.strip():
-    st.info("Searching for relevant papers...")
-    top_concepts = find_top_concepts(query, concepts_df, model)
-    related_papers = find_related_papers(top_concepts, papers_df)
+# -------------------- Streamlit Interface --------------------
 
-    st.markdown("## 📄 Recommended Papers")
-    papers_shown = set()
-    for _, paper_group in related_papers:
+st.set_page_config(page_title="Graph-RAG Citation Recommender", layout="wide")
+
+st.markdown("""
+<style>
+    .big-title {
+        font-size:40px !important;
+        font-weight:700;
+        color:#1F4E79;
+    }
+    .section-title {
+        font-size:28px !important;
+        font-weight:600;
+        margin-top:20px;
+    }
+    .footer {
+        font-size:14px;
+        color:gray;
+        margin-top:50px;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# Hero Section
+st.markdown('<h1 class="big-title">📚 Graph-RAG Citation Recommender</h1>', unsafe_allow_html=True)
+st.write("An intelligent assistant to recommend research citations based on your input paragraph using graph-based retrieval and concept clustering.")
+
+# Load Data
+concepts_df, papers_df = load_data()
+model = load_model()
+
+# Input Section
+st.markdown('<h2 class="section-title">🔍 Enter your research paragraph</h2>', unsafe_allow_html=True)
+query = st.text_area("Paste your paragraph here:", height=180)
+
+# Citation Format
+st.markdown("**📑 Citation Format: MLA (Default)**")
+
+# Search Button
+if st.button("🔎 Recommend Citations") and query.strip():
+    with st.spinner("Processing your query..."):
+        top_concepts = find_top_concepts(query, concepts_df, model)
+        related_papers = find_related_papers(top_concepts, papers_df)
+
+    st.markdown('<h2 class="section-title">📄 Recommended Papers</h2>', unsafe_allow_html=True)
+
+    found = False
+    for concept, paper_group in related_papers:
+        if paper_group.empty:
+            continue
         for _, paper in paper_group.iterrows():
-            if paper['Title'] in papers_shown:
-                continue
-            papers_shown.add(paper['Title'])
+            found = True
             st.markdown(f"**{paper['Title']}**")
             st.markdown(f"🖊️ {paper['Authors']} | 📅 {paper['Publishing Date']}")
-            if citation_style == "MLA":
-                st.markdown(f"*Citation (MLA):* {paper['Authors']}. \"{paper['Title']}\". {paper['Publishing Date']}. {paper['URL for pdf']}")
-            elif citation_style == "APA":
-                st.markdown(f"*Citation (APA):* {paper['Authors']} ({paper['Publishing Date']}). {paper['Title']}. {paper['URL for pdf']}")
-            elif citation_style == "BibTeX":
-                st.code(f"""@article{{citation,
-  title={{ {paper['Title']} }},
-  author={{ {paper['Authors']} }},
-  journal={{arXiv}},
-  year={{ {paper['Publishing Date']} }},
-  url={{ {paper['URL for pdf']} }}
-}}""")
+            if pd.notna(paper['URL for pdf']):
+                st.markdown(f"🔗 [Access Paper]({paper['URL for pdf']})")
+            # MLA citation only
+            st.markdown(f"📌 **Citation (MLA):** {paper['Authors']}. \"{paper['Title']}\". {paper['Publishing Date']}. {paper['URL for pdf']}")
+
+    if not found:
+        st.warning("No related papers were found for your query. Try rephrasing it.")
+
+# Sidebar - Project Info
+st.sidebar.image("logo.jpg", use_column_width=True)
+st.sidebar.title("📁 Project Info")
+st.sidebar.markdown("""
+**Graph-RAG Citation Recommender** helps you discover relevant research citations from a knowledge graph built on NLP concepts and papers.
+
+- Built using **Leiden Clustering**
+- Uses **Sentence Transformers** for semantic search
+- Powered by **Graph-based Retrieval**
+
+**Contributors:**
+- Jahnavi Patel
+- Pratishtha Gaur
+- Vivek Rayalu
+""")
+
+# Footer
+st.markdown('<div class="footer">© 2025 Graph-RAG Citation Discovery | All rights reserved.</div>', unsafe_allow_html=True)
